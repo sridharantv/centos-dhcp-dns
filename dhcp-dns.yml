@@ -1,0 +1,77 @@
+- hosts: dhcp_dns
+  become: yes
+  become_method: sudo
+  remote_user: osboxes
+  gather_facts: no
+  tasks:
+  - yum:
+      name: [ 'dhcp', 'bind' ]
+      state: installed
+
+  - command: 
+      cmd: /usr/sbin/rndc-confgen -a -b 512
+      creates: /etc/rndc.key
+
+  - file:
+      path: /etc/rndc.key
+      mode: '644'
+
+  - copy:
+      src: named.conf
+      dest: /etc/named.conf
+      backup: yes
+      mode: '644'
+
+  - copy:
+      src: sridhar.lab.zone
+      dest: /etc/named/sridhar.lab.zone
+      backup: yes
+      mode: '644'
+
+  - copy:
+      src: sridhar.lab.rev.zone
+      dest: /etc/named/sridhar.lab.rev.zone
+      backup: yes
+      mode: '644'
+
+  - lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-enp0s8
+      line: DNS1=127.0.0.1
+      state: present
+
+  - lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-enp0s3
+      line: PEERDNS=no
+      state: present
+
+  - service:
+      name: named
+      state: started
+      enabled: yes
+
+  - replace:
+      path: /etc/selinux/config
+      regexp: SELINUX=enforcing
+      replace: SELINUX=disabled
+  - file:
+      path: /etc/named
+      state: directory
+      mode: '775'
+
+  - copy:
+      src: dhcpd.conf
+      dest: /etc/dhcp/dhcpd.conf
+      backup: yes
+      mode: '644'
+
+  - service:
+      name: dhcpd
+      enabled: yes
+      state: started
+
+  - service:
+      name: firewalld
+      enabled: no
+      state: stopped
+
+  - command: systemctl reboot

@@ -1,0 +1,14 @@
+$ORIGIN sridhar.lab.
+$TTL 907200	; 1 week 3 days 12 hours
+@                IN SOA	ns1.sridhar.lab. admin.sridhar.lab. (
+				2014071403 ; serial
+				28800      ; refresh (8 hours)
+				3600       ; retry (1 hour)
+				604800     ; expire (1 week)
+				38400      ; minimum (10 hours 40 minutes)
+				)
+			NS	ns1
+
+ns1                     A       192.168.56.10
+centos-7-dhcp-dns       CNAME   ns1
+

@@ -1,0 +1,23 @@
+- hosts: initial_addr
+  become_method: sudo
+  become: yes
+  remote_user: osboxes
+  gather_facts: no
+  tasks:
+  - hostname:
+      name: centos-7-dhcp-dns
+  - copy:
+      content: |
+        DEVICE=enp0s8
+        IPADDR=192.168.56.10
+        SUBNET=255.255.255.0
+        ONBOOT=yes
+        BOOTPROTO=static
+      dest: /etc/sysconfig/network-scripts/ifcfg-enp0s8
+  - copy:
+      content: |
+        DEVICE=enp0s3
+        ONBOOT=yes
+        BOOTPROTO=dhcp
+      dest: /etc/sysconfig/network-scripts/ifcfg-enp0s3
+  - command: systemctl reboot
